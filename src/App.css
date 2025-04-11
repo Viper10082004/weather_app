@@ -14,6 +14,8 @@
 
 }
 
+
+
 .logo{
     font-size: 20px
 }
@@ -113,17 +115,17 @@ footer{
     align-items: center;
 }
 .daily-data{
-    background-color: rgba(238, 238, 238, 0.678);
+    background-color: white;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
     height: 60px;
-    margin-bottom: 5px;
     transition: all 0.15s ease;
+    border-bottom: 0.5px rgb(207, 207, 207) solid;
 }
 .daily-data:hover{
-    background-color: rgba(224, 224, 224, 0.678);
+    background-color: rgba(238, 238, 238, 0.678);
     cursor: pointer;
 }
 .daily{
@@ -146,3 +148,80 @@ footer{
   }
 
 
+
+
+  @media (max-width:860px){
+    .logo{
+        font-size: 20px !important;
+    }
+    .city{
+        font-size: 22px !important;
+    }
+
+    .weather-icon{
+        width: 20px;
+    }
+    .temperature span{
+        font-size: 13px !important;
+    }
+    .tem-icon{
+        width: 18px;
+    }
+    .day{
+        font-size: 13px !important;
+    }
+    .elements p{
+        font-size: 14px !important;
+    }
+}
+
+
+
+@media (max-width:730px){
+
+
+main{
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+.info{
+    width: 100%;
+    margin-bottom: 20px;
+    height: 300px;
+
+}
+.ad{
+    width: 100%;
+}
+
+.city{
+    font-size: 18px !important;
+}
+.day{
+    font-size: 12px !important;
+}
+.elements p{
+    font-size: 12px !important;
+}
+
+.daily-data{
+    height: 40px;
+}
+}
+
+@media (max-width:550px){
+
+    .logo{
+        font-size: 17px !important;
+    }
+    .search_field input{
+        width: 150px;
+    }
+    .search-input{
+        width: 20px;
+    }
+    
+    }

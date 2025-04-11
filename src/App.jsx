@@ -291,10 +291,10 @@ function App() {
                 return (
                   <div  key={dateString} className='daily-data' onClick={(e)=> {handleClick(index)}}>
                   <div className="day">{getAbbreviatedDayName(dateString)}</div>
-                  <div className="weather"><img src={`${getWeatherDescription(data.daily.weather_code[index])}.png`} width={"30px"} alt="" /></div>
+                  <div className="weather"><img className='weather-icon' src={`${getWeatherDescription(data.daily.weather_code[index])}.png`} width={"30px"} alt="" /></div>
                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}} className="temperature">
                     <span style={{ fontSize: "15px"}}>{data.daily.temperature_2m_max[index]}</span>
-                    <img src="temperature.png" width={"24px"} alt="" />
+                    <img className='tem-icon' src="temperature.png" width={"24px"} alt="" />
                     </div>
                 </div>
                 )
