@@ -7,42 +7,68 @@ function App() {
   const [data, setData] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [latitude, setLatitude] = useState(null);
-  const [location, setLocation] = useState(""); 
-  const [loading, setLoading] = useState(true); 
-
+  const [location, setLocation] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [details, setDetails] = useState(() => {
     const storedDetails = localStorage.getItem("details");
-    return storedDetails ? JSON.parse(storedDetails) : {  };
+    return storedDetails ? JSON.parse(storedDetails) : {};
   });
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault(); // Prevent form submission
+
+    if (!searchQuery.trim()) return; // Don't do anything if the search field is empty
+
+    // Fetch coordinates using LocationIQ API
+    const url = `https://us1.locationiq.com/v1/search.php?key=${API_KEY}&q=${searchQuery}&format=json`;
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        const locationData = data[0];
+        if (locationData) {
+          setLatitude(locationData.lat);
+          setLongitude(locationData.lon);
+          setLocation(locationData.display_name); // Update location info
+        }
+      })
+      .catch((error) => console.error("Error fetching location:", error));
+  };
 
   // Store details in localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("details", JSON.stringify(details));
-    console.log(details);
+    if (details) {
+      localStorage.setItem("details", JSON.stringify(details));
+    }
   }, [details]);
 
-  function handleClick (index) {
-    //console.log(index);
-     let day = data?.daily?.time[index];
-     let weather = data?.daily?.weather_code[index];
-     let windSpeed = data?.daily?.wind_speed_10m_max[index];
-     let temprature = data?.daily?.temperature_2m_max[index];
-     let windDirection = data?.daily?.wind_direction_10m_dominant[index];
-     let precipitation = data?.daily?.precipitation_sum[index];
-     let rain = data?.daily?.rain_sum[index];
-      
-     setDetails({
+  function handleClick(index) {
+    let day = data?.daily?.time[index];
+    let weather = data?.daily?.weather_code[index];
+    let windSpeed = data?.daily?.wind_speed_10m_max[index];
+    let temprature = data?.daily?.temperature_2m_max[index];
+    let windDirection = data?.daily?.wind_direction_10m_dominant[index];
+    let precipitation = data?.daily?.precipitation_sum[index];
+    let rain = data?.daily?.rain_sum[index];
+
+    setDetails({
       day,
       weather,
       windSpeed,
       temprature,
       windDirection,
       precipitation,
-      rain
+      rain,
+      latitude,
+      longitude
     });
-    //setDetails([ day= day, weather= weather, WindSpeed= WindSpeed, temprature= temprature, windDirection= windDirection, precipitation= precipitation, rain= rain])
-
   }
+
   const API_KEY = import.meta.env.VITE_LOCATIONIQ_KEY;
 
   const weatherDescriptions = {
@@ -54,10 +80,11 @@ function App() {
     48: "Depositing rime fog",
     51: "Drizzle (light)",
     53: "Drizzle (moderate)",
-    55: "Drizzle (dense)", //here we stop
+    55: "Drizzle (dense)",
     61: "Rain (light)",
     63: "Rain (moderate)",
     65: "Rain (heavy)",
+    73: "Rain (heavy)",
     80: "Rain showers (light)",
     81: "Rain showers (moderate)",
     82: "Rain showers (violent)",
@@ -70,33 +97,45 @@ function App() {
   function getWeatherDescription(code) {
     return weatherDescriptions[code] || "Unknown weather";
   }
+
   function getAbbreviatedDayName(dateString) {
     const date = new Date(dateString);
     const options = { weekday: 'short' };
-    const abbreviatedDayName = date.toLocaleDateString('en-US', options);
-    //console.log(abbreviatedDayName); // Outputs: "Wed"
-    return abbreviatedDayName;
+    return date.toLocaleDateString('en-US', options);
   }
 
   function getDay(dateTimeString) {
-    const dateString = dateTimeString;
-    const dateObject = new Date(dateString);
-    const dayName = dateObject.toLocaleDateString('en-US', { weekday: 'long' });
-    return(dayName); // Outputs: "Wednesday"
+    const dateObject = new Date(dateTimeString);
+    return dateObject.toLocaleDateString('en-US', { weekday: 'long' });
   }
-
-
 
   // Get User's Location
   useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLatitude(position.coords.latitude);
-          setLongitude(position.coords.longitude);
-        },
-        (error) => console.error("Geolocation error:", error)
-      );
+    // Check if details already exist in localStorage
+    const storedDetails = localStorage.getItem("details");
+    const parsedDetails = storedDetails ? JSON.parse(storedDetails) : {};
+
+    if (parsedDetails && parsedDetails.latitude && parsedDetails.longitude) {
+      setLatitude(parsedDetails.latitude);
+      setLongitude(parsedDetails.longitude);
+    } else {
+      // If no details found in localStorage, get geolocation
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLatitude(position.coords.latitude);
+            setLongitude(position.coords.longitude);
+            setDetails({
+              ...details,
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            });
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+          }
+        );
+      }
     }
   }, []);
 
@@ -116,8 +155,9 @@ function App() {
         .then(data => {
           setData(data);
           setLoading(false); // Stop loading after fetching data
-          getDay(data.current.time);
-          if (!localStorage.getItem("data")) {
+
+          // Only set details in localStorage if not already present
+          if (!localStorage.getItem("details")) {
             let day = data?.current?.time;
             let weather = data?.current?.weather_code;
             let windSpeed = data?.current?.wind_speed_10m;
@@ -125,7 +165,7 @@ function App() {
             let windDirection = data?.current?.wind_direction_10m;
             let precipitation = data?.current?.precipitation;
             let rain = data?.current?.rain;
-          
+
             setDetails({
               day,
               weather,
@@ -133,12 +173,11 @@ function App() {
               temprature,
               windDirection,
               precipitation,
-              rain
+              rain,
+              latitude,
+              longitude
             });
           }
-          getAbbreviatedDayName(data.current.time);
-
-
         })
         .catch(error => {
           console.error("Error fetching weather data:", error);
@@ -146,9 +185,7 @@ function App() {
         });
     }
   }, [latitude, longitude]);
-  console.log(data)
 
-  //console.log(details);
   // Fetch Location Data
   useEffect(() => {
     if (latitude && longitude) {
@@ -163,14 +200,23 @@ function App() {
     }
   }, [latitude, longitude]);
 
-
   return (
     <div className="container">
       <header className='header'>
         <div className="logo">Weather.App</div>
         <div className='search_field'>
-          <input type="text" placeholder='Other Cities' />
-          <img src="search.png" width={"25px"} alt="" />
+        <input type="text"
+              placeholder="Search for cities..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}  />
+          <img
+            src="search.png"
+            className='search-input'
+            width={"25px"}
+            alt="search icon"
+            onClick={handleSearchSubmit} // Trigger search on click
+          />
         </div>
       </header>
 

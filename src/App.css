@@ -141,4 +141,8 @@ footer{
     margin-bottom: 0px;
   }
 
+  .search-input{
+    cursor: pointer;
+  }
+
 
