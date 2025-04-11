@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { LineWave } from 'react-loader-spinner';
-import { parseISO, getDate, getMonth, getYear, getHours, getMinutes } from 'date-fns';
+import Header from "./components/Header";
+import Main from './components/Main';
+import Footer from './components/Footer';
+import ScrollReveal from "scrollreveal";
+
 
 function App() {
   const [data, setData] = useState(null);
@@ -15,6 +18,31 @@ function App() {
     return storedDetails ? JSON.parse(storedDetails) : {};
   });
 
+  useEffect(() => {
+    ScrollReveal().reveal(".info", {
+      origin: "bottom",
+      distance: "50px",
+      duration: 1500,
+      easing: "ease-in-out",
+      reset: false,
+    });
+  
+    ScrollReveal().reveal(".ad", {
+      origin: "bottom",
+      distance: "50px",
+      duration: 1500,
+      easing: "ease-in-out",
+      reset: false,
+    });
+  
+    ScrollReveal().reveal(".header", {
+      origin: "top",
+      distance: "50px",
+      duration: 1500,
+      easing: "ease-in-out",
+      reset: false,
+    });
+  }, []);
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -202,115 +230,22 @@ function App() {
 
   return (
     <div className="container">
-      <header className='header'>
-        <div className="logo">Weather.App</div>
-        <div className='search_field'>
-        <input type="text"
-              placeholder="Search for cities..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}  />
-          <img
-            src="search.png"
-            className='search-input'
-            width={"25px"}
-            alt="search icon"
-            onClick={handleSearchSubmit} // Trigger search on click
-          />
-        </div>
-      </header>
+      <Header
+        searchQuery={searchQuery}
+        handleSearchChange={handleSearchChange}
+        handleSearchSubmit={handleSearchSubmit}
+      />
 
-      <main>
-        <div className="info">
-          {loading ? (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-              <LineWave 
-                visible={true}
-                height="100"
-                width="100"
-                color="#3498db"
-                ariaLabel="line-wave-loading"
-              />
-            </div>
-          ) : (
-
-            <>
-              <p className='city'>
-          {getAbbreviatedDayName (details.day)} | {location} {details.temprature}{data?.current_units?.temperature_2m}  
-              </p>
-
-              <div className="details">
-                <div className="elements">
-                  <p>Weather</p>
-                  <p>{getWeatherDescription(details.weather)}</p>
-                </div>
-
-                <div className="elements">
-                  <p>Wind Speed</p>
-                  <p>{details.windSpeed}{data?.current_units?.wind_speed_10m}</p>
-                </div>
-
-                <div className="elements">
-                  <p>Temperature</p>
-                  <p>{details.temprature}{data?.current_units?.temperature_2m}</p>
-                </div>
-
-                <div className="elements">
-                  <p>Wind Direction</p>
-                  <p>{details.windDirection}{data?.current_units?.wind_direction_10m}</p>
-                </div>
-
-                <div className="elements">
-                  <p>Rain</p>
-                  <p>{details.rain}{data?.current_units?.rain}</p>
-                </div>
-
-                <div className="elements">
-                  <p>Precipitation</p>
-                  <p>{details.precipitation}{data?.current_units?.precipitation}</p>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className='ad'>
-          
-          {loading ? (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-              <LineWave 
-                visible={true}
-                height="100"
-                width="100"
-                color="#3498db"
-                ariaLabel="line-wave-loading"
-                />
-            </div>
-            ):(
-              data.daily.time.map((dateString, index) =>{
-                return (
-                  <div  key={dateString} className='daily-data' onClick={(e)=> {handleClick(index)}}>
-                  <div className="day">{getAbbreviatedDayName(dateString)}</div>
-                  <div className="weather"><img className='weather-icon' src={`${getWeatherDescription(data.daily.weather_code[index])}.png`} width={"30px"} alt="" /></div>
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}} className="temperature">
-                    <span style={{ fontSize: "15px"}}>{data.daily.temperature_2m_max[index]}</span>
-                    <img className='tem-icon' src="temperature.png" width={"24px"} alt="" />
-                    </div>
-                </div>
-                )
-              })
-              
-
-            )
-          }
-
-          
-        </div>
-      </main>
-
-      <footer>
-        Copyright
-      </footer>
+      <Main 
+        details={details}
+        location={location}
+        data={data}
+        loading={loading}
+        getAbbreviatedDayName={getAbbreviatedDayName}
+        getWeatherDescription={getWeatherDescription}
+        handleClick={handleClick}
+      />
+      <Footer />
     </div>
   );
 }
