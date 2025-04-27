@@ -77,6 +77,7 @@ function App() {
 
   function handleClick(index) {
     let day = data?.daily?.time[index];
+    
     let weather = data?.daily?.weather_code[index];
     let windSpeed = data?.daily?.wind_speed_10m_max[index];
     let temprature = data?.daily?.temperature_2m_max[index];
